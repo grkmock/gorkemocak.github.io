@@ -9,9 +9,9 @@
 
 #backgroundBody {
     background-repeat: no-repeat;
-    background-attachment: scratch;
+    background-attachment: fixed;
     background-position: center center;
-    background: url(background.png);
+    background: url(bckGif.gif);
     background-size: cover;
     background-color:#464646;
 }
@@ -25,7 +25,7 @@
     margin: 5px 2px;
     border-radius: 50%;
 
-    background: #120e07;
+    background: #020eF7;
     color: #ffce54;
 }
 
