@@ -382,4 +382,13 @@ body {
   .rit-cover .profess-cover .progress-bar {
     background-color: #00ab9f; }
 
+#backgroundBody {
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    background: url(bckGif.gif);
+    background-size: cover;
+    background-color:#464646;
+}
+
 /*# sourceMappingURL=style.css.map */
