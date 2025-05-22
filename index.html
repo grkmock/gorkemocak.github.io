@@ -1,236 +1,481 @@
-<!doctype html>
-<html lang="en">
-
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title> Görkem OCAK</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Su Seviyesi İzleme Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="shortcut icon" href="assets/images/fav.jpg">
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/fontawsom-all.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/style.css" />
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .water-level-display {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .water-percentage {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .water-status {
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            background: #e8f5e8;
+            border-radius: 25px;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .level-indicators {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .level-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .level-indicator.active {
+            background: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .level-indicator.inactive {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .level-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .level-label {
+            font-size: 0.9rem;
+        }
+
+        .status-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .alarm-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .alarm-active {
+            background: #ffebee;
+            color: #c62828;
+            border: 2px solid #ef5350;
+        }
+
+        .alarm-inactive {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #4CAF50;
+        }
+
+        .update-time {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .water-tank {
+            width: 100px;
+            height: 150px;
+            border: 3px solid #333;
+            border-radius: 0 0 15px 15px;
+            margin: 20px auto;
+            position: relative;
+            background: #f0f8ff;
+            overflow: hidden;
+        }
+
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #2196F3, #64B5F6);
+            transition: height 0.5s ease;
+            border-radius: 0 0 12px 12px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .status-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Su Seviyesi İzleme Sistemi</h1>
+            <p>Gerçek Zamanlı Su Seviyesi Takibi</p>
+        </div>
 
-<body id="backgroundBody">
-    <div class="container-fluid overcover">
-        <div class="container profile-box">
-            <div class="row">
-                <div class="col-md-4 left-co">
-                    <div class="left-side">
-                        <div class="profile-info">
-                            <img src="assets/images/profile.jpg" alt="">
-                            <h3>Görkem OCAK</h3>
-                            <span>Software Engineer</span>
-                        </div>
-                        <h4 class="ltitle">Contact</h4>
-                        <div class="contact-box pb0">
-                            <div class="icon">
-                                <i class="fas fa-phone"></i>
-                            </div>
-                            <div class="detail">
-                                +90 539 666 14 67
-                            </div>
-                        </div>
-                        <div class="contact-box pb0">
-                            <div class="icon">
-                                <i class="fas fa-globe-americas"></i>
-                            </div>
-                            <div class="detail">
-								grkmock@gmail.com
-                            </div>
-                        </div>
-                        <div class="contact-box">
-                            <div class="icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div class="detail">
-                                Eskişehir, Turkey
-                            </div>
-                        </div>
-                        <h4 class="ltitle">Contact</h4>
-                        <ul class="row social-link no-margin">
-                            <li><a href="https://www.linkedin.com/in/gorkem-ocak" class="fab fa-linkedin-in" target="_blank" rel="noopener noreferrer"></a></li>
-                            <li><a href="https://github.com/grkmock" class="fab fa-github" target="_blank" rel="noopener noreferrer"></a></li>
-							<li><a href="https://grkmock.github.io/gorkemocak.github.io/" class="fas fa-globe-americas" target="_blank" rel="noopener noreferrer"></a></li>
-                        </ul>
-                        <h4 class="ltitle">Referencess</h4>
+        <div class="dashboard">
+            <!-- Su Seviyesi Kartı -->
+            <div class="card">
+                <div class="card-title">💧 Su Seviyesi</div>
+                <div class="water-level-display">
+                    <div class="water-percentage" id="waterPercentage">25%</div>
+                    <div class="water-status" id="waterStatus">BİLGİ: %25 SEVİYE</div>
+                </div>
+                <div class="water-tank">
+                    <div class="water-fill" id="waterFill" style="height: 25%;"></div>
+                </div>
+            </div>
 
-                        <div class="refer-cov">
-                            <b>Kemal Özkan</b>
-                            <p>Prof. at Eskisehir Osmangazi University</p>
-                            <span>kozkan@ogu.edu.tr</span>
-                        </div>
-                        <div class="refer-cov">
-                            <b>Metin Özkan</b>
-                            <p>Assist.Prof. at Eskisehir Osmangazi University</p>
-                            <span>meozkan@ogu.edu.tr</span>
-                        </div>
-
-                        <h4 class="ltitle">Hobbies</h4>
-                        <ul class="hoby row no-margin">
-                            <li><i class="fas fa-futbol"></i> <br> Football</li>
-                            <li><i class="fas fa-plane-departure"></i> <br>Travel</li>
-                            <li><i class="fas fa-gamepad"></i> <br> Games</li>
-                        </ul>
+            <!-- Seviye Göstergeleri -->
+            <div class="card">
+                <div class="card-title">📊 Seviye Göstergeleri</div>
+                <div class="level-indicators">
+                    <div class="level-indicator active" id="level1">
+                        <div class="level-number">1</div>
+                        <div class="level-label">Seviye 1</div>
+                    </div>
+                    <div class="level-indicator inactive" id="level2">
+                        <div class="level-number">2</div>
+                        <div class="level-label">Seviye 2</div>
+                    </div>
+                    <div class="level-indicator inactive" id="level3">
+                        <div class="level-number">3</div>
+                        <div class="level-label">Seviye 3</div>
                     </div>
                 </div>
-                <div class="col-md-8 rt-div">
-                    <div class="rit-cover">
-                        <div class="hotkey">
-                            <h1 class="">Görkem OCAK </h1>
-                            <small>Software Engineer</small>
-                        </div>
-                        <h2 class="rit-titl"><i class="far fa-user"></i> Profile</h2>
-                        <div class="about">
-                            <p>I have more than 4 years of experience in the Defense Industry. I work as a software engineer to develop military vehicle’s power distribution software and its user interface software for maintenance and testing. I consider career opportunities for developing myself.I have effective verbal and written communication, planning and organizational skills. I am a person who can work in complex and large institutions, has problem identification and solving skills, is meticulous in obtaining quality outputs, is result and solution oriented, has analytical thinking, creative, enterprising, business development features.</p>
-                        </div>
+            </div>
 
-                        <h2 class="rit-titl"><i class="fas fa-briefcase"></i> Work Experiance</h2>
-                        <div class="work-exp">
-                            <h6>Expert Software Developer <span>2017-Now</span></h6>
-                            <i>Savronik / Turkey</i>
-                            <ul>
-                                <li><i class="far fa-hand-point-right"></i> Responsible for developing and maintaining of military vehicle's power distribution software which including embedded and user interface software </li>
-                                <li><i class="far fa-hand-point-right"></i> Responsible for developing a software for new R\&D projects </li>
-                                <li><i class="far fa-hand-point-right"></i> Worked with Turkish Lead Defence Industry Companies such as ASELSAN, TUSAŞ etc. </li>
-                            </ul>
-                        </div>
-
-                        <h2 class="rit-titl"><i class="fas fa-graduation-cap"></i> Education</h2>
-                        <div class="education">
-                            <ul class="row no-margin">
-                                <li class="col-md-6"><span>2018-2022</span> <br>
-                                    M.Sc Computer Engineering - <span>Eskişehir Osmangazi University</span></li>
-                                <li class="col-md-6"><span>2012-2017</span> <br>
-                                    B.Sc Computer Engineering - <span>Eskişehir Osmangazi University</span></li>
-                            </ul>							
-                        </div>
-
-                        <h2 class="rit-titl"><i class="fas fa-users-cog"></i> Skills</h2>
-                        <div class="profess-cover row no-margin">
-                            <div class="col-md-6">
-                                <div class=" prog-row row">
-                                    <div class="col-sm-6">
-                                        C
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row prog-row">
-                                    <div class="col-sm-6">
-                                        C++
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 60%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-							
-							                            <div class="col-md-6">
-                                <div class=" prog-row row">
-                                    <div class="col-sm-6">
-                                        C#
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 90%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row prog-row">
-                                    <div class="col-sm-6">
-                                        Java
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-							
-							<div class="col-md-6">
-                                <div class=" prog-row row">
-                                    <div class="col-sm-6">
-                                        Pyhton
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row prog-row">
-                                    <div class="col-sm-6">
-                                        Kotlin
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-							
-							<div class="col-md-6">
-                                <div class=" prog-row row">
-                                    <div class="col-sm-6">
-                                        Embedded Software
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 60%" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="row prog-row">
-                                    <div class="col-sm-6">
-                                        Application Software
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: 75%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
+            <!-- Sistem Durumu -->
+            <div class="card">
+                <div class="card-title">⚡ Sistem Durumu</div>
+                <div class="alarm-status alarm-inactive" id="alarmStatus">
+                    ✅ Alarm Pasif
+                </div>
+                <div class="status-info">
+                    <div class="info-item">
+                        <div class="info-label">Mevcut Seviye</div>
+                        <div class="info-value" id="currentLevel">1</div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label">IP Adresi</div>
+                        <div class="info-value" id="ipAddress">192.168.1.104</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zaman Bilgisi -->
+            <div class="card">
+                <div class="card-title">🕐 Zaman Bilgisi</div>
+                <div class="info-item">
+                    <div class="info-label">Son Güncelleme</div>
+                    <div class="info-value" id="timestamp">175803</div>
+                </div>
+                <div class="update-time" id="lastUpdate">
+                    Son güncelleme: Az önce
+                </div>
+            </div>
+            <!-- Test Verisi Sayısı Bilgisi -->
+            <div class="card">
+                <div class="card-title">Test Adeti</div>
+                <div class="info-item">
+                    <div class="info-label">Test Adeti</div>
+                    <div class="info-value" id="testCount">0</div>
                 </div>
             </div>
         </div>
     </div>
-	
-	<object data="assets/docs/GorkemOCAK_CV_ENG.pdf" type="application/pdf" width="100%" height="1000px">
-      <p>Unable to display PDF file. <a href="assets/docs/GorkemOCAK_CV_ENG.pdf">Download</a> instead.</p>
-    </object>
-	
-	<object data="assets/docs/GorkemOCAK_CV__TR_.pdf" type="application/pdf" width="100%" height="1000px">
-      <p>Unable to display PDF file. <a href="assets/docs/GorkemOCAK_CV__TR_.pdf">Download</a> instead.</p>
-    </object>
-	
-	
+
+    <script type="module">
+        // Firebase yapılandırması - kendi bilgilerinizle değiştirin
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
+
+        // Firebase config - Firebase Console'dan alınan güncel bilgiler
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIO7xT-F19FfBpnyRH1-_MgDc9lbv_7Jw",
+            authDomain: "serhatkoy-6495a.firebaseapp.com",
+            databaseURL: "https://serhatkoy-6495a-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "serhatkoy-6495a",
+            storageBucket: "serhatkoy-6495a.firebasestorage.app",
+            messagingSenderId: "346921733395",
+            appId: "1:346921733395:web:3664ef2d5cc61d02749ee6",
+            measurementId: "G-L7SPST87E7"
+        };
+
+        // Firebase'i başlat
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Verileri güncelleme fonksiyonu
+        function updateDisplay(data) {
+            // Su yüzdesi
+            const waterPercentage = data.water_percentage || 0;
+            document.getElementById('waterPercentage').textContent = `${waterPercentage}%`;
+            document.getElementById('waterFill').style.height = `${waterPercentage}%`;
+            
+            // Su durumu
+            document.getElementById('waterStatus').textContent = data.water_status || 'Veri yok';
+            
+            // Seviye göstergeleri
+            const level1 = document.getElementById('level1');
+            const level2 = document.getElementById('level2');
+            const level3 = document.getElementById('level3');
+            
+            // Tüm seviyeleri pasif yap
+            [level1, level2, level3].forEach(el => {
+                el.className = 'level-indicator inactive';
+            });
+            
+            // Aktif seviyeleri işaretle
+            if (data.levelsadddelete?.level_1) level1.className = 'level-indicator active';
+            if (data.levelsadddelete?.level_2) level2.className = 'level-indicator active';
+            if (data.levelsadddelete?.level_3) level3.className = 'level-indicator active';
+            
+            // Alarm durumu
+            const alarmStatus = document.getElementById('alarmStatus');
+            if (data.status?.alarm_active) {
+                alarmStatus.className = 'alarm-status alarm-active';
+                alarmStatus.innerHTML = '🚨 Alarm Aktif';
+            } else {
+                alarmStatus.className = 'alarm-status alarm-inactive';
+                alarmStatus.innerHTML = '✅ Alarm Pasif';
+            }
+            
+            // Mevcut seviye
+            document.getElementById('currentLevel').textContent = data.status?.current_level || '-';
+            
+            // IP adresi
+            document.getElementById('ipAddress').textContent = data.status?.ip_address || '-';
+            
+            // Zaman damgası - güncel tarih saat olarak göster
+            const timestamp = data.status?.timestamp;
+            if (timestamp) {
+                // Timestamp'i milisaniye cinsinden kontrol et
+                let date;
+                if (timestamp.toString().length === 10) {
+                    // Unix timestamp (saniye)
+                    date = new Date(timestamp * 1000);
+                } else if (timestamp.toString().length === 13) {
+                    // Unix timestamp (milisaniye)
+                    date = new Date(timestamp);
+                } else {
+                    // Diğer durumlar için mevcut zamanı kullan
+                    date = new Date();
+                }
+                
+                document.getElementById('timestamp').textContent = date.toLocaleString('tr-TR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } else {
+                document.getElementById('timestamp').textContent = '-';
+            }
+            
+            // Son güncelleme zamanı
+            document.getElementById('lastUpdate').textContent = `Son güncelleme: ${new Date().toLocaleString('tr-TR')}`;
+            
+            // Su yüzdesine göre renk değişimi
+            const percentageElement = document.getElementById('waterPercentage');
+            if (waterPercentage < 20) {
+                percentageElement.style.color = '#f44336'; // Kırmızı
+            } else if (waterPercentage < 50) {
+                percentageElement.style.color = '#ff9800'; // Turuncu
+            } else {
+                percentageElement.style.color = '#4CAF50'; // Yeşil
+            }
+        }
+
+        // Firebase'den veri dinleme
+        const dataRef = ref(database, '/test'); // test yolu
+
+        onValue(dataRef, (snapshot) => {
+            try {
+                const data = snapshot.val();
+                //console.log('Veri güncellendi:', data);
+                
+                if (data) {
+                    // Direkt veri yapısını kontrol et
+                    // Test sayısını güncelle
+                    const testCount = data.water_counter || 0;
+                    document.getElementById('testCount').textContent = testCount;
+                } else {
+                    console.error('Veri yok veya geçersiz:', data);
+                }
+            } catch (error) {
+                console.error('Veri güncellenirken hata:', error);
+            }
+        }, {
+            onlyOnce: false // Her güncellemede dinle
+        });
+
+        const waterSensorRef = ref(database, '/water_sensor'); // water_sensor yolu
+        // Dinleme işlemi
+
+        onValue(waterSensorRef, (snapshot) => {
+            try {
+                const data = snapshot.val();
+                //console.log('Veri güncellendi water:', data);
+                
+                if (data) {
+                    // Direkt veri yapısını kontrol et
+                    
+                    const sensorData = {
+                        water_percentage: data.status?.water_percentage || 0,
+                        water_status: data.status?.water_status || 'Veri yok',
+                        levelsadddelete: {
+                            level_1: data.levels?.level_1 || false,
+                            level_2: data.levels?.level_2 || false,
+                            level_3: data.levels?.level_3 || false
+                        },
+                        status: {
+                            alarm_active: data.status?.alarm_active || false,
+                            current_level: data.status?.current_level || 0,
+                            ip_address: data.status?.ip_address || 'Bilinmiyor',
+                            timestamp: data.status?.timestamp || Date.now()
+                        }
+                    };
+                    updateDisplay(sensorData);
+                } else {
+                    console.error('Veri yok veya geçersiz:', data);
+                }
+            } catch (error) {
+                console.error('Veri güncellenirken hata:', error);
+            }
+        }, {
+            onlyOnce: false // Her güncellemede dinle
+        });
+
+        // Demo veri için (Firebase bağlantısı yoksa)
+        // setTimeout(() => {
+        //     const demoData = {
+        //         levelsadddelete: {
+        //             level_1: true,
+        //             level_2: false,
+        //             level_3: false
+        //         },
+        //         status: {
+        //             alarm_active: false,
+        //             current_level: 1,
+        //             ip_address: "192.168.1.104",
+        //             timestamp: 175893
+        //         },
+        //         water_percentage: 25,
+        //         water_status: "BİLGİ: %25 SEVİYE"
+        //     };
+        //     updateDisplay(demoData);
+        // }, 1000);
+    </script>
 </body>
-
-<script src="assets/js/jquery-3.2.1.min.js"></script>
-<script src="assets/js/popper.min.js"></script>
-<script src="assets/js/bootstrap.min.js"></script>
-<script src="assets/js/script.js"></script>
-
-
 </html>
