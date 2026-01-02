@@ -1,6 +1,6 @@
 # Görkem Ocak
 
-<img src="assets/profile.png" alt="Görkem Ocak" width="140" align="right"/>
+<img src="profile.png" alt="Görkem Ocak" width="140" align="right"/>
 
 **Software Engineer**  
 Eskişehir, Turkey  
