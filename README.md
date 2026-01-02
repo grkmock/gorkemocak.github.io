@@ -41,7 +41,7 @@ Senior Software Engineer with 8+ years of experience building and scaling **embe
 
 ---
 
-### Software Engineer / Senior Software Engineer — Savronik (Defense & Aerospace)
+### Senior Software Engineer — Savronik (Defense & Aerospace)
 **Dec 2017 – Oct 2023 | Eskişehir, Turkey**
 
 - Developed and maintained **mission-critical embedded and UI software** for military vehicle power distribution and control systems.
